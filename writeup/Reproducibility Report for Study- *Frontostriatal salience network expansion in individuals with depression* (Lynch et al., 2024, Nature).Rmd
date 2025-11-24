@@ -1,0 +1,118 @@
+---
+title: "Reproducibility Report for Study: *Frontostriatal salience network expansion in individuals with depression* (Lynch et al., 2024, Nature)"
+author: "Reproducibility Project — Eugenia Giampetruzzi (eugiampe@stanford.edu)"
+date: "October 21, 2025"
+output:
+  html_document:
+    toc: true
+    toc_depth: 3
+
+# Introduction
+
+The original study used precision functional mapping to generate participant-specific brain network parcellations. This method combined multi-echo fMRI preprocessing, surface-based connectivity analysis, and Infomap community detection. In multiple samples of depressed patients, the authors found that salience network expansion is a trait-like topological feature in adults with depression.
+
+This report outlines a computational reproduction of the method in Lynch et al. for generating participant-specific network parcellations and quantifying salience network cortical size. Using publicly available data from a healthy control participant in the Weill Cornell multi-echo dataset (OpenNeuro ds005118), I will reproduce their preprocessing and mapping workflow (HCP surface pipelines, ME-ICA/tedana denoising, surface-based functional connectivity, Infomap community detection, and algorithmic assignment to canonical networks). I will then compare my outputs directly to the published results for this participant.
+
+I will follow the authors’ publicly available code for preprocessing multi-echo fMRI data (https://github.com/cjl2007/Liston-Laboratory-MultiEchofMRI-Pipeline) and performing the precision functional mapping & network size calculations (https://github.com/cjl2007/PFM-Depression). The pipeline requires several external neuroimaging tools (Freesurfer, FSL, Connectome Workbench, Infomap, MATLAB, and tedana Python). I will document the pipeline and results in this `.Rmd` file and upload `.txt` and `.py` scripts with additional detail.
+
+# Justification for Choice of Study
+
+My FYP will apply precision functional mapping to identify trait-like brain network topology in a longitudinal sample of emotionally dysregulated adolescents.
+
+Reproducing the methods from this study gives me an opportunity to  
+1) correctly configure the many necessary neuroimaging tools,  
+2) practice implementing the preprocessing and mapping pipeline, and  
+3) learn how to interpret key metrics such as salience network cortical size.
+
+# Anticipated Challenges
+
+Potential challenges include:
+
+1. Installing and configuring all required tools, plus downloading large CIFTI files on an old macOS machine with uncertain compatibility and limited storage.  
+2. Limited experience with multi-echo rsfMRI preprocessing (echo combination, ME-ICA denoising).  
+3. No prior experience with Connectome Workbench or Infomap, which require specialized command-line syntax.
+
+# Links
+
+- **Project repository (GitHub):** https://github.com/eugiampetruzzi/lynch2024  
+- **Original paper (hosted in repo):** https://github.com/eugiampetruzzi/lynch2024/tree/main/original_paper
+
+# Methods
+
+## Description of the Steps Required to Reproduce the Results
+
+**Data Acquisition**  
+A. Download the multi-echo resting-state fMRI dataset from OpenNeuro (ds005118) for sub-ME01.  
+B. Obtain accompanying metadata (echo times, field maps, task design) required for multi-echo combination and ME-ICA denoising.
+
+**Preprocessing**  
+A. *Anatomical:* Use HCP minimal preprocessing pipelines for bias correction, skull stripping, MNI registration, and FreeSurfer surface reconstruction.  
+B. *Functional:* Perform ME-ICA denoising using `tedana`. Apply motion correction, temporal filtering, and smoothing. Project preprocessed data onto the cortical surface using Connectome Workbench. Concatenate runs and apply temporal scrubbing (tmask).
+
+**Functional Connectivity Mapping**  
+A. Compute vertex-wise functional connectivity matrices by correlating each cortical vertex’s time series with every other vertex.  
+B. Fisher r-to-z transform all correlation values.
+
+**Community Detection (Precision Functional Mapping)**  
+A. Run Infomap community detection on the individual’s connectivity matrix.  
+B. Assign each community to a canonical resting-state network (salience, DMN, FPN, etc.) using spatial overlap with the Yeo 7-network template.
+
+**Network Size Quantification**  
+Compute the surface area of each identified network on the individual’s cortical surface. Express salience network (SN) size as percentage of total cortical surface area.
+
+**Comparison to Reference Map**  
+A. Use the author-provided reference parcellation (`Bipartite_PhysicalCommunities+FinalLabeling.dlabel.nii`).  
+B. Compare reproduced parcellations to reference maps via spatial correlation and network-size differences.
+
+## Differences from Original Study
+
+- The original study used a Linux-based HPC cluster; I am using macOS locally, which may influence runtime.  
+- I am using updated versions of FreeSurfer, FSL, MATLAB, and system dependencies (2025 instead of 2023).  
+- Some paths and commands must be modified manually due to differences in OS and environment configuration.  
+
+These differences may introduce minor numerical deviations but should not fundamentally alter the qualitative structure of the networks.
+
+# Project Progress Check 1
+
+## Measure of Success
+
+- **Topological agreement:** spatial correlation *r* ≥ 0.9 between my parcellation and the reference (`Bipartite_PhysicalCommunities+FinalLabeling.dlabel.nii`).  
+- **Salience network size:** SN cortical area should differ from the reference by ≤ 0.1 percentage points.
+
+## Pipeline Progress
+
+**Completed:**  
+- Cloned GitHub repositories (preprocessing + analysis).  
+- Downloaded the OpenNeuro dataset (ds005118).  
+- Verified MATLAB scripts (`pfm_tutorial.m`).  
+- Installing dependencies: FreeSurfer, FSL, Connectome Workbench, Infomap, tedana.
+
+**Not started:**  
+- Functional connectivity mapping  
+- Community detection  
+- Network size quantification  
+- Comparison with reference parcellation
+
+# Results
+
+## Data Preparation
+
+_Data preparation according to the analysis plan (to be completed after preprocessing)._
+
+## Key Analysis
+
+_This section will contain the key reproduced analysis and a side-by-side figure showing my output versus the original._  
+
+## Exploratory Analyses
+
+_Follow-up analyses if relevant (optional)._
+
+# Discussion
+
+## Summary of Reproduction Attempt
+
+_A summary paragraph will go here describing whether the key results were successfully reproduced, partially reproduced, or not reproduced._
+
+## Commentary
+
+_Open-ended discussion of exploratory findings, factors influencing reproducibility, and potential sources of mismatch between the original and reproduced pipeline._
